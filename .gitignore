@@ -5,9 +5,10 @@
 *.json
 !*parameters.json
 
-# Local settings
+# Local settings (contains secrets)
 .env
 *.local
+*.local.json
 .venv/
 NOTES.local.md
 *.local.md

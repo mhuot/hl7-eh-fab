@@ -11,6 +11,8 @@ param adminUsername string = 'azureuser'
 param deployFabricCapacity bool = true  // Set to true if you have Fabric quota
 @description('Resource ID of an existing Log Analytics workspace. Leave empty to create a new one.')
 param existingLogAnalyticsWorkspaceId string = ''
+@description('Email address of the Fabric capacity administrator')
+param fabricAdminEmail string = ''
 @secure()
 param sshPublicKey string
 
@@ -43,6 +45,7 @@ module fabricCapacity 'fabricCapacity.bicep' = if (deployFabricCapacity) {
   params: {
     capacityName: capacityName
     location: location
+    fabricAdminEmail: fabricAdminEmail
   }
 }
 
