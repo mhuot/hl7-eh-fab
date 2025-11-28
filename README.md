@@ -48,7 +48,7 @@ flowchart LR
    Pod1 ==>|"Kafka Protocol"| PE
    Pod2 ==>|"Kafka Protocol"| PE
    PE ==>|"Private Link"| EH
-   EH =.=>|"Diagnostics"| LA
+   EH -.->|"Diagnostics"| LA
    MPE ==>|"Private Link"| EH
    ES ==> MPE
    ES ==>|"Streaming"| KQL
