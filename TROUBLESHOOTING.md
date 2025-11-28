@@ -138,11 +138,6 @@ Error: KafkaError: Broker not available
 
 ### Microsoft Fabric Issues
 
-#### "Managed private endpoints tab not visible"
-**Cause**: Fabric capacity SKU is too low (requires F64+).
-
-**Solution**: Upgrade to F64 SKU in `infra/fabricCapacity.bicep` or use public access (set `publicNetworkAccess: 'Enabled'` in resources.bicep).
-
 #### "Eventstream cannot connect to Event Hubs"
 **Solution**:
 1. Verify managed private endpoint is approved
