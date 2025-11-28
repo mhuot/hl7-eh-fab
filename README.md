@@ -42,17 +42,17 @@ flowchart LR
       PBI["📈 Power BI"]
    end
 
-   HL7 -->|"MLLP over TCP"| LB
-   LB --> Pod1
-   LB --> Pod2
-   Pod1 -->|"Kafka Protocol"| PE
-   Pod2 -->|"Kafka Protocol"| PE
-   PE -->|"Private Link"| EH
-   EH -.->|"Diagnostics"| LA
-   MPE -->|"Private Link"| EH
-   ES --> MPE
-   ES -->|"Streaming"| KQL
-   KQL -->|"Query"| PBI
+   HL7 ==>|"MLLP over TCP"| LB
+   LB ==> Pod1
+   LB ==> Pod2
+   Pod1 ==>|"Kafka Protocol"| PE
+   Pod2 ==>|"Kafka Protocol"| PE
+   PE ==>|"Private Link"| EH
+   EH =.=>|"Diagnostics"| LA
+   MPE ==>|"Private Link"| EH
+   ES ==> MPE
+   ES ==>|"Streaming"| KQL
+   KQL ==>|"Query"| PBI
 
    linkStyle default stroke:#e8e8e8,stroke-width:2
    
