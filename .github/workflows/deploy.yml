@@ -1,0 +1,99 @@
+name: Deploy HL7 Listener
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      image_tag:
+        description: 'Image tag'
+        required: false
+        default: 'latest'
+
+env:
+  RESOURCE_GROUP: hl7-demo-rg
+  AKS_CLUSTER: hl7-aks
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get ACR name
+        id: acr
+        run: |
+          ACR_NAME=$(az acr list --resource-group ${{ env.RESOURCE_GROUP }} --query "[0].name" -o tsv)
+          echo "name=$ACR_NAME" >> $GITHUB_OUTPUT
+          echo "loginServer=$(az acr show --name $ACR_NAME --query loginServer -o tsv)" >> $GITHUB_OUTPUT
+
+      - name: Build and push to ACR
+        run: |
+          az acr build \
+            --registry ${{ steps.acr.outputs.name }} \
+            --image hl7listener:${{ github.event.inputs.image_tag || 'latest' }} \
+            ./src/hl7-listener/
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER }} \
+            --overwrite-existing
+
+      - name: Get Event Hubs connection string
+        id: eventhub
+        run: |
+          EH_NAMESPACE=$(az eventhubs namespace list --resource-group ${{ env.RESOURCE_GROUP }} --query "[0].name" -o tsv)
+          EH_CONNECTION=$(az eventhubs namespace authorization-rule keys list \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --namespace-name $EH_NAMESPACE \
+            --name KafkaSendListen \
+            --query primaryConnectionString -o tsv)
+          echo "namespace=$EH_NAMESPACE" >> $GITHUB_OUTPUT
+          echo "::add-mask::$EH_CONNECTION"
+          echo "connection=$EH_CONNECTION" >> $GITHUB_OUTPUT
+
+      - name: Deploy to AKS
+        run: |
+          # Create namespace
+          kubectl apply -f k8s/namespace.yaml
+          
+          # Create/update secret
+          kubectl create secret generic eventhub-credentials \
+            --namespace hl7 \
+            --from-literal=EVENTHUB_NAMESPACE=${{ steps.eventhub.outputs.namespace }} \
+            --from-literal=EVENTHUB_CONNECTION_STRING="${{ steps.eventhub.outputs.connection }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          
+          # Update deployment with ACR image
+          sed "s|hl7listener:latest|${{ steps.acr.outputs.loginServer }}/hl7listener:${{ github.event.inputs.image_tag || 'latest' }}|g" \
+            k8s/deployment.yaml | kubectl apply -f -
+          
+          # Deploy service
+          kubectl apply -f k8s/service.yaml
+          
+          # Wait for rollout
+          kubectl rollout status deployment/hl7-listener -n hl7 --timeout=240s
+
+      - name: Get service info
+        run: |
+          echo "### Deployment Complete! :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Service Details:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          kubectl get service hl7-listener -n hl7 >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

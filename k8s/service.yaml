@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hl7-listener
+  namespace: hl7
+  labels:
+    app: hl7-listener
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 2575
+    targetPort: 2575
+    protocol: TCP
+    name: mllp
+  selector:
+    app: hl7-listener

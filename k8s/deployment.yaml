@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hl7-listener
+  namespace: hl7
+  labels:
+    app: hl7-listener
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hl7-listener
+  template:
+    metadata:
+      labels:
+        app: hl7-listener
+    spec:
+      containers:
+      - name: hl7-listener
+        image: hl7listener:latest
+        ports:
+        - containerPort: 2575
+          name: mllp
+          protocol: TCP
+        env:
+        - name: MLLP_HOST
+          value: "0.0.0.0"
+        - name: MLLP_PORT
+          value: "2575"
+        - name: EVENTHUB_NAME
+          value: "hl7-events"
+        - name: EVENTHUB_NAMESPACE
+          valueFrom:
+            secretKeyRef:
+              name: eventhub-credentials
+              key: EVENTHUB_NAMESPACE
+        - name: EVENTHUB_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: eventhub-credentials
+              key: EVENTHUB_CONNECTION_STRING
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          tcpSocket:
+            port: 2575
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          tcpSocket:
+            port: 2575
+          initialDelaySeconds: 5
+          periodSeconds: 10

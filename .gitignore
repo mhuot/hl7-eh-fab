@@ -1,0 +1,14 @@
+# Deployment packages
+*.zip
+
+# ARM template outputs
+*.json
+!*parameters.json
+
+# Local settings
+.env
+*.local
+.venv/
+NOTES.local.md
+*.local.md
+.DS_Store

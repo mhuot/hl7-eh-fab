@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "sshPublicKey": {
+      "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDEsRvK2Q8xy+n3i35rKlxs8Z8Z+QgHSyydUw1IZfC/hXdwdcjsPMfM25/6l/WNdrthGyHIHiCJHvcK0X0ht5zbm+u1I04RO/pHN8OlI5wjMfgyL5Pi1doA2Q/qsrE6bPCx1YRnxdbxvr70CvXfZ+GeLOFMfR8+Rp2ffCuu7tk8cwya8GikJlwtSWZU4iTayZ5HuGmUi52Qz8+aCHR4W96EFUz0BLK/CU5rJjJksCdnsd22tZX6ITx9zgJ8+eucKQg6O7gtFdJeDN+m8t53K7GkE/Vh0q6bod+iUV9C0yWYk00qU0XpDxCoOnqRsOfkD/u7us1lnZbRNZMhcfQ1RkkMK7edKKDtdpCDRnmdC/qxBeBeZB21nYH/yu/vSAg0xEevQC4sxf0DnX43i6xlS00VvTPx6FTQVhkuPatwEQ1khAviSlSbfBBxIZJEoZE9lywwwyNo6IAHnz2q4HG+geYELgEr7RP6BCVrICeiZq+b9DJ/X8qBODxCy0IWw1Y+3n8="
+    },
+    "existingLogAnalyticsWorkspaceId": {
+      "value": ""
+    }
+  }
+}
