@@ -57,24 +57,24 @@ flowchart LR
    linkStyle default stroke:#e8e8e8,stroke-width:2
    
    %% WCAG AA compliant colors with 4.5:1 contrast ratio
-   style Client fill:#1a1a2e,stroke:#e94560,stroke-width:2px,color:#ffffff
-   style Azure fill:#16213e,stroke:#0f3460,stroke-width:2px,color:#ffffff
-   style VNet fill:#1f4068,stroke:#e8e8e8,stroke-width:2px,color:#ffffff
-   style AKS fill:#2d4a6f,stroke:#ffd700,stroke-width:2px,color:#ffffff
-   style PESubnet fill:#2d4a6f,stroke:#ffd700,stroke-width:1px,color:#ffffff
-   style EventHubs fill:#4a1942,stroke:#e94560,stroke-width:2px,color:#ffffff
-   style Fabric fill:#1e5128,stroke:#4e9f3d,stroke-width:2px,color:#ffffff
-   style HL7 fill:#e94560,stroke:#ffffff,stroke-width:2px,color:#ffffff
-   style LB fill:#0f3460,stroke:#ffd700,stroke-width:2px,color:#ffffff
-   style Pod1 fill:#0f3460,stroke:#e8e8e8,stroke-width:1px,color:#ffffff
-   style Pod2 fill:#0f3460,stroke:#e8e8e8,stroke-width:1px,color:#ffffff
-   style PE fill:#d4a017,stroke:#1a1a2e,stroke-width:2px,color:#1a1a2e
-   style EH fill:#7b2d8e,stroke:#ffffff,stroke-width:2px,color:#ffffff
-   style LA fill:#0f3460,stroke:#e8e8e8,stroke-width:1px,color:#ffffff
-   style MPE fill:#d4a017,stroke:#1a1a2e,stroke-width:2px,color:#1a1a2e
-   style ES fill:#4e9f3d,stroke:#ffffff,stroke-width:2px,color:#ffffff
-   style KQL fill:#1e5128,stroke:#4e9f3d,stroke-width:2px,color:#ffffff
-   style PBI fill:#4e9f3d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+   %% style Client fill:#1a1a2e,stroke:#e94560,stroke-width:2px,color:#ffffff
+   %% style Azure fill:#16213e,stroke:#0f3460,stroke-width:2px,color:#ffffff
+   %% style VNet fill:#1f4068,stroke:#e8e8e8,stroke-width:2px,color:#ffffff
+   %% style AKS fill:#2d4a6f,stroke:#ffd700,stroke-width:2px,color:#ffffff
+   %% style PESubnet fill:#2d4a6f,stroke:#ffd700,stroke-width:1px,color:#ffffff
+   %% style EventHubs fill:#4a1942,stroke:#e94560,stroke-width:2px,color:#ffffff
+   %% style Fabric fill:#1e5128,stroke:#4e9f3d,stroke-width:2px,color:#ffffff
+   %% style HL7 fill:#e94560,stroke:#ffffff,stroke-width:2px,color:#ffffff
+   %% style LB fill:#0f3460,stroke:#ffd700,stroke-width:2px,color:#ffffff
+   %% style Pod1 fill:#0f3460,stroke:#e8e8e8,stroke-width:1px,color:#ffffff
+   %% style Pod2 fill:#0f3460,stroke:#e8e8e8,stroke-width:1px,color:#ffffff
+   %% style PE fill:#d4a017,stroke:#1a1a2e,stroke-width:2px,color:#1a1a2e
+   %% style EH fill:#7b2d8e,stroke:#ffffff,stroke-width:2px,color:#ffffff
+   %% style LA fill:#0f3460,stroke:#e8e8e8,stroke-width:1px,color:#ffffff
+   %% style MPE fill:#d4a017,stroke:#1a1a2e,stroke-width:2px,color:#1a1a2e
+   %% style ES fill:#4e9f3d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+   %% style KQL fill:#1e5128,stroke:#4e9f3d,stroke-width:2px,color:#ffffff
+   %% style PBI fill:#4e9f3d,stroke:#ffffff,stroke-width:2px,color:#ffffff
 ```
 
 ### Data Flow
