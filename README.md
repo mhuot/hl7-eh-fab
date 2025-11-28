@@ -10,25 +10,25 @@ This project demonstrates a healthcare data streaming pipeline:
 ## Architecture
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '24px' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px' }}}%%
 flowchart LR
    subgraph Client["🏥 On-Premises"]
       HL7["HL7 Source<br/>HIS/EMR"]
    end
 
-   subgraph Azure["☁️ Azure Subscription"]
+   subgraph Azure["☁️ Azure"]
       subgraph VNet["VNet: 10.200.0.0/16"]
          subgraph AKS["AKS Cluster"]
                LB["Load Balancer<br/>Port 2575"]
                Pod1["HL7 Listener<br/>Pod 1"]
                Pod2["HL7 Listener<br/>Pod 2"]
          end
-         subgraph PESubnet["PE Subnet: 10.200.4.0/24"]
+         subgraph PESubnet["PE Subnet"]
                PE["🔒 Private Endpoint<br/>hl7-eventhub-pe"]
          end
       end
       
-      subgraph EventHubs["Event Hubs Namespace"]
+      subgraph EventHubs["Event Hubs"]
          EH["📨 hl7-events<br/>Kafka Protocol"]
       end
       
@@ -48,16 +48,13 @@ flowchart LR
    Pod1 -->|"Kafka Protocol"| PE
    Pod2 -->|"Kafka Protocol"| PE
    PE -->|"Private Link"| EH
-   EH e1@-..->|"Diagnostics"| LA
-   classDef animate stroke-dasharray: 9,5,stroke-dashoffset: 900,animation: dash 25s linear infinite;
-   class e1 animate
+   EH -.->|"Diagnostics"| LA
    MPE -->|"Private Link"| EH
    ES --> MPE
    ES -->|"Streaming"| KQL
    KQL -->|"Query"| PBI
 
-   linkStyle default stroke:#e8e8e8, stroke-width:2
-   linkStyle 6 stroke-width:3px
+   linkStyle default stroke:#e8e8e8,stroke-width:2
    
    %% WCAG AA compliant colors with 4.5:1 contrast ratio
    style Client fill:#1a1a2e,stroke:#e94560,stroke-width:2px,color:#ffffff
