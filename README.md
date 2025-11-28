@@ -121,19 +121,34 @@ flowchart LR
 
 ## Quick Start
 
-```bash
-# 1. Validate prerequisites
-make validate
+1. **Create your local parameters file** (contains your secrets - gitignored):
+   ```bash
+   cp infra/main.parameters.json infra/main.parameters.local.json
+   ```
 
-# 2. Deploy infrastructure
-make infra
+2. **Edit the local file with your values:**
+   - `sshPublicKey`: Your SSH public key (`cat ~/.ssh/id_rsa.pub`)
+   - `fabricAdminEmail`: Your email for Fabric capacity admin
 
-# 3. Deploy HL7 listener
-make deploy
+3. **Validate prerequisites:**
+   ```bash
+   make validate
+   ```
 
-# 4. Test (replace with your external IP)
-make test IP=<EXTERNAL-IP>
-```
+4. **Deploy infrastructure:**
+   ```bash
+   make infra
+   ```
+
+5. **Deploy HL7 listener:**
+   ```bash
+   make deploy
+   ```
+
+6. **Test** (replace with your external IP):
+   ```bash
+   make test IP=<EXTERNAL-IP>
+   ```
 
 Or use the scripts directly:
 - **Linux/macOS**: `./deploy.sh`
@@ -142,12 +157,23 @@ Or use the scripts directly:
 ## Deployment
 
 ### Using Parameters File (Recommended)
+
+1. **Create your local parameters file:**
+   ```bash
+   cp infra/main.parameters.json infra/main.parameters.local.json
+   ```
+
+2. **Edit** `infra/main.parameters.local.json` with your values.
+
+3. **Deploy:**
 ```bash
 az deployment sub create \
   --template-file infra/main.bicep \
   --location centralus \
-  --parameters infra/main.parameters.json
+  --parameters infra/main.parameters.local.json
 ```
+
+> **Note**: `main.parameters.local.json` is gitignored and contains your sensitive values (SSH key, email). The checked-in `main.parameters.json` contains placeholder values as a template.
 
 ### Using Inline Parameters
 ```bash
@@ -176,6 +202,7 @@ az deployment sub create \
 | `aksName` | hl7-aks | AKS cluster name |
 | `acrName` | hl7acr{unique} | Azure Container Registry name |
 | `deployFabricCapacity` | true | Deploy Fabric capacity (requires quota) |
+| `fabricAdminEmail` | *(required if deploying Fabric)* | Email for Fabric capacity administrator |
 | `existingLogAnalyticsWorkspaceId` | *(empty)* | Resource ID of existing Log Analytics workspace (see below) |
 | `sshPublicKey` | *required* | SSH public key for AKS nodes |
 
@@ -288,8 +315,10 @@ If you prefer manual steps:
      --namespace hl7 \
      --from-literal=EVENTHUB_NAMESPACE=<your-namespace> \
      --from-literal=EVENTHUB_CONNECTION_STRING="<your-connection-string>"
-   
-   # Update image in k8s/deployment.yaml, then:
+   ```
+
+   Update the image in `k8s/deployment.yaml`, then:
+   ```bash
    kubectl apply -f k8s/deployment.yaml
    kubectl apply -f k8s/service.yaml
    ```
