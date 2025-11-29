@@ -461,12 +461,12 @@ Event Hubs is configured with private endpoints only. Fabric supports Managed Pr
 1. In the Eventhouse, click **Get data**
 2. Select **Event Hubs** from the dropdown
 
-![Get Data - Event Hubs](docs/images/add%20data%20source%20to%20kql.png)
+![Get Data - Event Hubs](docs/images/add-data-source-to-kql.png)
 
 3. Under **Select or create a destination table**, expand `hl7-eventstream`
 4. Click **+ New table** and name it `hl7_messages`
 
-![Pick Destination Table](docs/images/Pick%20Table.png)
+![Pick Destination Table](docs/images/pick-table.png)
 
 5. On the right panel, select **Create new connection**
 6. Fill in the connection details:
