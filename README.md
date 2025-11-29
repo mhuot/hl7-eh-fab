@@ -9,7 +9,44 @@ This project demonstrates a healthcare data streaming pipeline:
 - Streamed to Azure Event Hubs using Kafka protocol
 - Routed into Microsoft Fabric Eventstream for real-time analytics
 
+## Table of Contents
+- [Architecture](#architecture)
+  - [Detailed Network View](#detailed-network-view)
+  - [Data Flow](#data-flow)
+- [Deployed Resources](#deployed-resources)
+- [Network Configuration](#network-configuration)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Deployment](#deployment)
+  - [Using Parameters File](#using-parameters-file-recommended)
+  - [Using Inline Parameters](#using-inline-parameters)
+  - [Custom Configuration](#custom-configuration)
+  - [Parameters](#parameters)
+  - [Using an Existing Log Analytics Workspace](#using-an-existing-log-analytics-workspace)
+- [Teardown](#teardown)
+- [HL7 Listener Application](#hl7-listener-application)
+  - [Automated Deployment](#automated-deployment-recommended)
+  - [Manual Deployment](#manual-deployment)
+  - [Test the Listener](#test-the-listener)
+  - [Local Development](#local-development)
+- [Microsoft Fabric Setup](#microsoft-fabric-setup)
+  - [Step 1: Create Fabric Workspace](#step-1-create-fabric-workspace)
+  - [Step 2: Create Managed Private Endpoint](#step-2-create-managed-private-endpoint-required)
+  - [Step 3: Create Eventhouse](#step-3-create-eventhouse)
+  - [Step 4: Configure Event Hubs Data Source](#step-4-configure-event-hubs-data-source)
+  - [Step 5: Verify Data Flow](#step-5-verify-data-flow)
+  - [Sample KQL Queries](#sample-kql-queries)
+- [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [Monitoring & Diagnostics](#monitoring--diagnostics)
+- [Security Considerations](#security-considerations)
+- [License](#license)
+
 ## Architecture
+
+![Architecture Overview](docs/images/architecture-overview.jpg)
+
+### Detailed Network View
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px' }}}%%
