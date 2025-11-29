@@ -1,6 +1,8 @@
 
 # HL7 MLLP → Kafka → Azure Event Hubs → Microsoft Fabric
 
+> ⚠️ **POC/Lab Only**: This project is intended for learning and demonstration purposes. It is not production-ready. See [Security Considerations](#security-considerations) before deploying.
+
 ## Overview
 This project demonstrates a healthcare data streaming pipeline:
 - HL7 v2.x messages ingested via MLLP on AKS
@@ -607,6 +609,42 @@ az monitor log-analytics query \
   --analytics-query "AzureDiagnostics | where ResourceProvider == 'MICROSOFT.EVENTHUB' | take 10" \
   -o table
 ```
+
+## Security Considerations
+
+> ⚠️ **This project is a POC/Lab and is NOT production-ready.**
+
+HL7 messages contain Protected Health Information (PHI) subject to HIPAA and other regulations. Before using this architecture in production, address the following:
+
+### Network Security
+
+| Current State | Production Requirement |
+|---------------|----------------------|
+| Public LoadBalancer exposes MLLP to internet | Use [Internal LoadBalancer](https://learn.microsoft.com/en-us/azure/aks/internal-lb) with VPN/ExpressRoute for on-premises connectivity |
+| No TLS encryption on MLLP port | Implement TLS termination at load balancer or in-app encryption |
+| No Network Security Groups | Add NSGs to restrict traffic to known source IPs |
+
+### Recommended Production Changes
+
+1. **Use Internal Load Balancer**:
+   ```yaml
+   # k8s/service.yaml
+   metadata:
+     annotations:
+       service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+   ```
+
+2. **Add TLS** using Azure Application Gateway or in-app SSL/TLS
+
+3. **Enable Azure Private Link** for all services (already done for Event Hubs)
+
+4. **Add Azure Policy** for compliance enforcement
+
+5. **Enable Microsoft Defender for Cloud** for threat detection
+
+6. **Implement proper secret management** with Azure Key Vault
+
+For production healthcare workloads, consider [Azure Health Data Services](https://learn.microsoft.com/en-us/azure/healthcare-apis/) which provides HIPAA-compliant FHIR APIs.
 
 ## License
 Apache License 2.0

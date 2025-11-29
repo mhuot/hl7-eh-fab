@@ -21,10 +21,16 @@ validate: ## Check prerequisites
 	@./scripts/validate-prereqs.sh
 
 infra: ## Deploy Azure infrastructure (Bicep)
+	@if [ ! -f infra/main.parameters.local.json ]; then \
+		echo "Error: infra/main.parameters.local.json not found."; \
+		echo "Create it by running: cp infra/main.parameters.json infra/main.parameters.local.json"; \
+		echo "Then edit it with your SSH key and email."; \
+		exit 1; \
+	fi
 	az deployment sub create \
 		--template-file infra/main.bicep \
 		--location $(LOCATION) \
-		--parameters infra/main.parameters.json \
+		--parameters infra/main.parameters.local.json \
 		--name hl7Deployment
 
 deploy: ## Deploy HL7 listener to AKS
