@@ -4,11 +4,16 @@ HL7 MLLP Listener - Receives HL7 v2.x messages and forwards to Azure Event Hubs 
 """
 
 import os
+import signal
 import socket
+import sys
 import threading
 import json
 import logging
 from datetime import datetime
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from typing import Optional
+
 from confluent_kafka import Producer
 
 # Configure logging
