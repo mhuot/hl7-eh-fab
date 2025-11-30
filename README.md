@@ -384,8 +384,9 @@ Event Hubs is configured with private endpoints only. Fabric supports Managed Pr
      --query id -o tsv
    ```
 
-7. For **Target sub-resource**, select **namespace** (for Event Hubs)
+7. For **Target sub-resource**, select `namespace`
 8. Click **Create**
+9. The newly created connection will show `Provisioning`
 
 ![Creating Managed Private Endpoint in Fabric](docs/images/Add_MPE_to_Fabric.gif)
 
@@ -401,21 +402,19 @@ Event Hubs is configured with private endpoints only. Fabric supports Managed Pr
 
 ![Event Hubs Private Access](docs/images/eventhub-private-access.png)
 
-8. In the "Approve connection" dialog, click **Yes**
-
-![Approve Connection Dialog](docs/images/eventhub-approve-dialog.png)
+8. In the "Approve connection" dialog, you can enter an optional comment, and then click **Yes**
 
 #### Part C: Verify the Connection
 
-1. Return to your Fabric workspace → **Workspace settings** → **Network security**
-2. Confirm your endpoint status changed to **Approved**
+1. Return to your Fabric workspace → **Workspace settings** → **Outbound networking**
+2. Confirm your endpoint status changed to `Approved`
 
 > **Note**: It may take 1-2 minutes for the approval to propagate.
 
 ### Step 3: Create Eventhouse
 
 1. In your Fabric workspace, click **+ New item** → **Eventhouse**
-2. Name it `hl7-eventstream`
+2. Name it `hl7-eventhouse`
 3. Click **Create**
 4. A KQL database with the same name is automatically created
 
