@@ -35,10 +35,10 @@ EH_CONNECTION_STRING=$(az eventhubs namespace authorization-rule keys list \
   --name KafkaSendListen \
   --query primaryConnectionString -o tsv)
 
-# Build and push image to ACR
+# Build and push image to ACR (ARM64 for AKS nodes)
 echo ""
 echo "Building and pushing image to ACR..."
-az acr build --registry $ACR_NAME --image hl7listener:${IMAGE_TAG} ./src/hl7-listener/
+az acr build --registry $ACR_NAME --image hl7listener:${IMAGE_TAG} --platform linux/arm64 ./src/hl7-listener/
 
 # Deploy to Kubernetes
 echo ""
