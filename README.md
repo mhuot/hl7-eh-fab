@@ -243,7 +243,7 @@ Fabric resources are managed separately and must be deleted manually:
    - Right-click the Eventhouse → **Delete**
 
 3. **Delete Managed Private Endpoints**:
-   - Go to **Workspace settings** → **Network security** → **Outbound networking**
+   - Go to **Workspace settings** → **Outbound networking**
    - Select each private endpoint → **Delete**
 
 4. **Delete Workspace** (optional):
@@ -368,11 +368,10 @@ Event Hubs is configured with private endpoints only. Fabric supports Managed Pr
 
 1. Open your Fabric workspace (`hl7-analytics`)
 2. Click **Workspace settings** (gear icon, top-right corner)
-3. In the left menu, expand **Network security**
-4. Select **Outbound networking**
-5. Under **Managed private endpoints**, click **Create**
-6. Set the **Managed private endpoint name** to `hl7-eventhub-mpe`
-7. For **Resource identifier**, enter your Event Hubs resource ID:
+3. In the left menu, select **Outbound networking**
+4. Under **Managed private endpoints**, click **+ Create**
+5. Set the **Managed private endpoint name** to `hl7-eventhub-mpe`
+6. For **Resource identifier**, enter your Event Hubs resource ID:
    ```
    /subscriptions/<subscription-id>/resourceGroups/hl7-demo-rg/providers/Microsoft.EventHub/namespaces/<your-namespace>
    ```
@@ -385,8 +384,8 @@ Event Hubs is configured with private endpoints only. Fabric supports Managed Pr
      --query id -o tsv
    ```
 
-8. For **Target sub-resource**, select **namespace** (for Event Hubs)
-9. Click **Create**
+7. For **Target sub-resource**, select **namespace** (for Event Hubs)
+8. Click **Create**
 
 ![Creating Managed Private Endpoint in Fabric](docs/images/Add_MPE_to_Fabric.gif)
 
