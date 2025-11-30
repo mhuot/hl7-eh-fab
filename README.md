@@ -9,47 +9,9 @@ This project demonstrates a healthcare data streaming pipeline:
 - Streamed to Azure Event Hubs using Kafka protocol
 - Routed into Microsoft Fabric Eventstream for real-time analytics
 
-## Table of Contents
-- [Architecture](#architecture)
-  - [Detailed Network View](#detailed-network-view)
-  - [Data Flow](#data-flow)
-- [Deployed Resources](#deployed-resources)
-- [Network Configuration](#network-configuration)
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Deployment](#deployment)
-  - [Using Parameters File](#using-parameters-file-recommended)
-  - [Using Inline Parameters](#using-inline-parameters)
-  - [Custom Configuration](#custom-configuration)
-  - [Parameters](#parameters)
-  - [Using an Existing Log Analytics Workspace](#using-an-existing-log-analytics-workspace)
-- [Teardown](#teardown)
-- [HL7 Listener Application](#hl7-listener-application)
-  - [Automated Deployment](#automated-deployment-recommended)
-  - [Manual Deployment](#manual-deployment)
-  - [Test the Listener](#test-the-listener)
-  - [Local Development](#local-development)
-- [Microsoft Fabric Setup](#microsoft-fabric-setup)
-  - [Step 1: Create Fabric Workspace](#step-1-create-fabric-workspace)
-  - [Step 2: Create Managed Private Endpoint](#step-2-create-managed-private-endpoint-required)
-  - [Step 3: Create Eventhouse](#step-3-create-eventhouse)
-  - [Step 4: Configure Event Hubs Data Source](#step-4-configure-event-hubs-data-source)
-  - [Step 5: Verify Data Flow](#step-5-verify-data-flow)
-  - [Sample KQL Queries](#sample-kql-queries)
-- [Project Structure](#project-structure)
-- [Troubleshooting](#troubleshooting)
-- [Monitoring & Diagnostics](#monitoring--diagnostics)
-- [Security Considerations](#security-considerations)
-- [License](#license)
-
 ## Architecture
 
-![Architecture Overview](docs/images/architecture-overview.jpg)
-
-### Detailed Network View
-
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px' }}}%%
 flowchart LR
    subgraph Client["🏥 On-Premises"]
       HL7["HL7 Source<br/>HIS/EMR"]
@@ -81,39 +43,17 @@ flowchart LR
       PBI["📈 Power BI"]
    end
 
-   HL7 ==>|"MLLP over TCP"| LB
-   LB ==> Pod1
-   LB ==> Pod2
-   Pod1 ==>|"Kafka Protocol"| PE
-   Pod2 ==>|"Kafka Protocol"| PE
-   PE ==>|"Private Link"| EH
+   HL7 -->|"MLLP over TCP"| LB
+   LB --> Pod1
+   LB --> Pod2
+   Pod1 -->|"Kafka Protocol"| PE
+   Pod2 -->|"Kafka Protocol"| PE
+   PE -->|"Private Link"| EH
    EH -.->|"Diagnostics"| LA
-   MPE ==>|"Private Link"| EH
-   ES ==> MPE
-   ES ==>|"Streaming"| KQL
-   KQL ==>|"Query"| PBI
-
-   linkStyle default stroke:#e8e8e8,stroke-width:2
-   
-   %% WCAG AA compliant colors with 4.5:1 contrast ratio
-   %% style Client fill:#1a1a2e,stroke:#e94560,stroke-width:2px,color:#ffffff
-   %% style Azure fill:#16213e,stroke:#0f3460,stroke-width:2px,color:#ffffff
-   %% style VNet fill:#1f4068,stroke:#e8e8e8,stroke-width:2px,color:#ffffff
-   %% style AKS fill:#2d4a6f,stroke:#ffd700,stroke-width:2px,color:#ffffff
-   %% style PESubnet fill:#2d4a6f,stroke:#ffd700,stroke-width:1px,color:#ffffff
-   %% style EventHubs fill:#4a1942,stroke:#e94560,stroke-width:2px,color:#ffffff
-   %% style Fabric fill:#1e5128,stroke:#4e9f3d,stroke-width:2px,color:#ffffff
-   %% style HL7 fill:#e94560,stroke:#ffffff,stroke-width:2px,color:#ffffff
-   %% style LB fill:#0f3460,stroke:#ffd700,stroke-width:2px,color:#ffffff
-   %% style Pod1 fill:#0f3460,stroke:#e8e8e8,stroke-width:1px,color:#ffffff
-   %% style Pod2 fill:#0f3460,stroke:#e8e8e8,stroke-width:1px,color:#ffffff
-   %% style PE fill:#d4a017,stroke:#1a1a2e,stroke-width:2px,color:#1a1a2e
-   %% style EH fill:#7b2d8e,stroke:#ffffff,stroke-width:2px,color:#ffffff
-   %% style LA fill:#0f3460,stroke:#e8e8e8,stroke-width:1px,color:#ffffff
-   %% style MPE fill:#d4a017,stroke:#1a1a2e,stroke-width:2px,color:#1a1a2e
-   %% style ES fill:#4e9f3d,stroke:#ffffff,stroke-width:2px,color:#ffffff
-   %% style KQL fill:#1e5128,stroke:#4e9f3d,stroke-width:2px,color:#ffffff
-   %% style PBI fill:#4e9f3d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+   MPE -->|"Private Link"| EH
+   ES --> MPE
+   ES -->|"Streaming"| KQL
+   KQL -->|"Query"| PBI
 ```
 
 ### Data Flow
@@ -461,12 +401,12 @@ Event Hubs is configured with private endpoints only. Fabric supports Managed Pr
 1. In the Eventhouse, click **Get data**
 2. Select **Event Hubs** from the dropdown
 
-![Get Data - Event Hubs](docs/images/add-data-source-to-kql.png)
+![Get Data - Event Hubs](docs/images/add%20data%20source%20to%20kql.png)
 
 3. Under **Select or create a destination table**, expand `hl7-eventstream`
 4. Click **+ New table** and name it `hl7_messages`
 
-![Pick Destination Table](docs/images/pick-table.png)
+![Pick Destination Table](docs/images/Pick%20Table.png)
 
 5. On the right panel, select **Create new connection**
 6. Fill in the connection details:
