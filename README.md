@@ -9,7 +9,28 @@ This project demonstrates a healthcare data streaming pipeline:
 - Streamed to Azure Event Hubs using Kafka protocol
 - Routed into Microsoft Fabric Eventstream for real-time analytics
 
+## Table of Contents
+- [Architecture](#architecture)
+- [Deployed Resources](#deployed-resources)
+- [Network Configuration](#network-configuration)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Deployment](#deployment)
+- [Teardown](#teardown)
+- [HL7 Listener Application](#hl7-listener-application)
+- [Microsoft Fabric Setup](#microsoft-fabric-setup)
+- [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [Monitoring & Diagnostics](#monitoring--diagnostics)
+- [Security Considerations](#security-considerations)
+- [License](#license)
+
 ## Architecture
+
+![Architecture Overview](docs/images/architecture-overview.jpg)
+
+<details>
+<summary>View Mermaid Diagram</summary>
 
 ```mermaid
 flowchart LR
@@ -55,6 +76,8 @@ flowchart LR
    ES -->|"Streaming"| KQL
    KQL -->|"Query"| PBI
 ```
+
+</details>
 
 ### Data Flow
 
