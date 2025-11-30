@@ -63,8 +63,31 @@ kubectl apply -f k8s/service.yaml
 
 # Wait for deployment
 echo ""
-echo "Waiting for deployment..."
-kubectl rollout status deployment/hl7-listener -n hl7 --timeout=240s
+echo "Waiting for deployment (timeout: 5 minutes)..."
+if ! kubectl rollout status deployment/hl7-listener -n hl7 --timeout=300s; then
+  echo ""
+  echo "⚠️  Deployment is taking longer than expected. Checking status..."
+  echo ""
+  echo "=== Pod Status ==="
+  kubectl get pods -n hl7 -o wide
+  echo ""
+  echo "=== Pod Events ==="
+  kubectl describe pods -n hl7 -l app=hl7-listener | grep -A 20 "Events:"
+  echo ""
+  echo "=== Recent Pod Logs (if available) ==="
+
+  echo ""
+  echo "The deployment is still in progress. You can:"
+  echo "  1. Wait and check status:  kubectl get pods -n hl7 -w"
+  echo "  2. View logs:              kubectl logs -n hl7 -l app=hl7-listener -f"
+  echo "  3. Describe pods:          kubectl describe pods -n hl7"
+  echo ""
+  echo "Common issues:"
+  echo "  - Image pull errors: Check ACR permissions"
+  echo "  - CrashLoopBackOff: Check Event Hubs connection string"
+  echo "  - Pending: Check node resources (kubectl describe nodes)"
+  exit 1
+fi
 
 # Cleanup temp file
 rm -f /tmp/deployment-updated.yaml
