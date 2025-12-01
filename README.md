@@ -7,7 +7,7 @@
 This project demonstrates a healthcare data streaming pipeline:
 - HL7 v2.x messages ingested via MLLP on AKS
 - Streamed to Azure Event Hubs using Kafka protocol
-- Routed into Microsoft Fabric Eventstream for real-time analytics
+- Ingested into Microsoft Fabric Eventhouse (KQL Database) for real-time analytics
 
 ## Table of Contents
 - [Architecture](#architecture)
@@ -59,7 +59,6 @@ flowchart LR
 
    subgraph Fabric["📊 Microsoft Fabric"]
       MPE["🔒 Managed PE<br/>hl7-eventhub-mpe"]
-      ES["⚡ Eventstream"]
       KQL["🗃️ Eventhouse<br/>KQL Database"]
       PBI["📈 Power BI"]
    end
@@ -72,8 +71,7 @@ flowchart LR
    PE -->|"Private Link"| EH
    EH -.->|"Diagnostics"| LA
    MPE -->|"Private Link"| EH
-   ES --> MPE
-   ES -->|"Streaming"| KQL
+   KQL --> MPE
    KQL -->|"Query"| PBI
 ```
 
@@ -88,9 +86,8 @@ flowchart LR
 | 3 | **Private Endpoint** | Routes traffic securely to Event Hubs (no public internet) |
 | 4 | **Event Hubs** | Receives messages via Kafka protocol |
 | 5 | **Fabric MPE** | Connects to Event Hubs via private link |
-| 6 | **Eventstream** | Ingests and optionally transforms data in real-time |
-| 7 | **Eventhouse (KQL)** | Stores data for analytics and querying |
-| 8 | **Power BI** | Visualizes HL7 message trends and patient data |
+| 6 | **Eventhouse (KQL)** | Ingests from Event Hubs and stores data for analytics |
+| 7 | **Power BI** | Visualizes HL7 message trends and patient data |
 
 ## Deployed Resources
 - **Azure Container Registry**: For storing the HL7 listener container image
@@ -236,20 +233,17 @@ az group delete --name hl7-demo-rg --yes --no-wait
 ### Microsoft Fabric Resources
 Fabric resources are managed separately and must be deleted manually:
 
-1. **Delete Eventstream** (if created):
-   - Go to your Fabric workspace → Right-click the Eventstream → **Delete**
-
-2. **Delete Eventhouse/KQL Database**:
+1. **Delete Eventhouse/KQL Database**:
    - Right-click the Eventhouse → **Delete**
 
-3. **Delete Managed Private Endpoints**:
+2. **Delete Managed Private Endpoints**:
    - Go to **Workspace settings** → **Outbound networking**
    - Select each private endpoint → **Delete**
 
-4. **Delete Workspace** (optional):
+3. **Delete Workspace** (optional):
    - Go to **Workspace settings** → **General** → **Remove this workspace**
 
-5. **Delete Fabric Capacity** (if no longer needed):
+4. **Delete Fabric Capacity** (if no longer needed):
    ```bash
    az resource delete \
      --resource-group hl7-demo-rg \
@@ -425,7 +419,7 @@ Event Hubs is configured with private endpoints only. Fabric supports Managed Pr
 
 ![Get Data - Event Hubs](docs/images/add%20data%20source%20to%20kql.png)
 
-3. Under **Select or create a destination table**, expand `hl7-eventstream`
+3. Under **Select or create a destination table**, expand `hl7-eventhouse`
 4. Click **+ New table** and name it `hl7_messages`
 
 ![Pick Destination Table](docs/images/Pick%20Table.png)
@@ -466,7 +460,7 @@ Event Hubs is configured with private endpoints only. Fabric supports Managed Pr
    python src/hl7-listener/send_test_hl7.py <AKS-EXTERNAL-IP> 2575
    ```
 
-2. In the Eventstream, verify messages are flowing (check the metrics on the canvas)
+2. In the Eventhouse, verify messages are flowing by querying the table
 
 3. Query data in KQL Database:
    ```kusto

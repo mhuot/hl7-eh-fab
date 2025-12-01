@@ -9,7 +9,7 @@ Create a workshop-ready architecture for ingesting HL7 v2.x messages via MLLP, s
 ## Scope
 - HL7 ingestion via MLLP listener on AKS.
 - Kafka integration using Event Hubs Kafka endpoint (no separate Kafka cluster).
-- Fabric Eventstream for ingestion and routing to KQL DB.
+- Fabric Eventhouse (KQL Database) for ingestion and real-time analytics.
 - IaC with Bicep for AKS, Event Hubs, Private Link, and Fabric capacity.
 - Easy cleanup: single resource group deletion.
 
@@ -32,8 +32,8 @@ Create a workshop-ready architecture for ingesting HL7 v2.x messages via MLLP, s
 - Private Link for secure connectivity.
 
 ### 4. Fabric
-- Eventstream connected to Event Hubs.
-- Route to KQL DB for analytics.
+- Eventhouse with Event Hubs data connection.
+- KQL Database for analytics.
 - Optional Power BI dashboard.
 
 ### 5. IaC
@@ -66,12 +66,12 @@ HTTP/FHIR ingestion using Azure Logic Apps HL7 connector or FHIR Converter for c
 
 ## Architecture Overview
 **Flow**:  
-`HL7 MLLP Listener (AKS) → Kafka Producer → Event Hubs (Kafka endpoint) → Fabric Eventstream → KQL DB → Power BI`
+`HL7 MLLP Listener (AKS) → Kafka Producer → Event Hubs (Kafka endpoint) → Fabric Eventhouse (KQL DB) → Power BI`
 
 **Components**:
 - AKS cluster (HL7 ingestion service + optional Kafka Connect).
 - Azure Event Hubs namespace.
-- Microsoft Fabric workspace with Eventstream and KQL DB.
+- Microsoft Fabric workspace with Eventhouse and KQL DB.
 
 ---
 
@@ -79,19 +79,19 @@ HTTP/FHIR ingestion using Azure Logic Apps HL7 connector or FHIR Converter for c
 - AKS deployment YAML for HL7 ingestion service.
 - Kafka producer sample (Python or Java).
 - Event Hubs namespace setup guide.
-- Fabric Eventstream configuration steps.
+- Fabric Eventhouse configuration steps.
 - KQL queries and dashboard template.
 
 ---
 
 ## Risks & Mitigations
 - **Firewall issues**: Fabric cannot ingest from Event Hubs behind firewall without Managed Private Endpoint.  
-- **Schema drift**: Use dynamic mapping in Eventstream.
+- **Schema drift**: Use dynamic mapping in Eventhouse data connection.
 - **Latency**: Optimize ACK handling and Kafka batching.
 
 ---
 
 ## References
 - [Event Hubs Kafka integration](https://learn.microsoft.com/en-us/azure/event-hubs/azure-event-hubs-apache-kafka-overview)
-- [Fabric Eventstream setup](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/overview)
+- [Fabric Eventhouse overview](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/eventhouse)
 - [Private Link for Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/private-link-service)

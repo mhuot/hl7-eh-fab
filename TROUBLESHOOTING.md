@@ -138,11 +138,12 @@ Error: KafkaError: Broker not available
 
 ### Microsoft Fabric Issues
 
-#### "Eventstream cannot connect to Event Hubs"
+#### "Eventhouse cannot connect to Event Hubs"
 **Solution**:
-1. Verify managed private endpoint is approved
-2. Check Event Hubs connection string is correct
+1. Verify managed private endpoint is approved in Azure Portal
+2. Check Event Hubs connection string is correct (use hub-level key, not namespace)
 3. Ensure consumer group exists (`$Default`)
+4. Verify the Event Hub name is `hl7-events`
 
 ---
 
