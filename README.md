@@ -27,7 +27,7 @@ This project demonstrates a healthcare data streaming pipeline:
 
 ## Architecture
 
-![Architecture Overview](docs/images/architecture-overview.jpg)
+![Architecture Overview](docs/images/architecture-overview.png)
 
 <details>
 <summary>View Mermaid Diagram</summary>
