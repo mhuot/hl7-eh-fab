@@ -7,7 +7,8 @@
 This project demonstrates a healthcare data streaming pipeline:
 - HL7 v2.x messages ingested via MLLP on AKS
 - Streamed to Azure Event Hubs using Kafka protocol
-- Ingested into Microsoft Fabric Eventhouse (KQL Database) for real-time analytics
+- Ingested into Microsoft Fabric via **Eventstream** with managed private endpoint
+- Stored in Eventhouse (KQL Database) for real-time analytics
 
 ![Architecture Overview](docs/images/architecture-overview.png)
 
@@ -65,7 +66,9 @@ Replace `<EXTERNAL-IP>` with the external IP shown at the end of `make deploy`.
 
 ## Microsoft Fabric Setup
 
-After deploying infrastructure, configure Fabric to ingest HL7 messages.
+After deploying infrastructure, configure Fabric to ingest HL7 messages using **Eventstream** with a managed private endpoint.
+
+> **Note**: Eventstream with MPE is the recommended approach for connecting to Event Hubs with private networking. Direct Eventhouse-to-Event Hub connections with MPE have known limitations.
 
 ### Step 1: Create Fabric Workspace
 
@@ -76,60 +79,50 @@ After deploying infrastructure, configure Fabric to ingest HL7 messages.
 
 ### Step 2: Create Managed Private Endpoint
 
-Event Hubs requires a private endpoint for Fabric connectivity.
+Create a private endpoint for secure Event Hub connectivity.
 
 1. Open your workspace → **Workspace settings** (gear icon)
-2. Select **Outbound networking** → **+ Create**
+2. Select **Network security** → **+ Create**
 3. Configure:
    - **Name**: `hl7-eventhub-mpe`
    - **Resource identifier**: *(get with command below)*
-   - **Target sub-resource**: `namespace`
+   - **Target sub-resource**: `Azure Event Hub`
 
    ```bash
-   az eventhubs namespace show \
+   # Get Event Hub namespace resource ID
+   az eventhubs namespace list \
      --resource-group hl7-demo-rg \
-     --name $(az eventhubs namespace list --resource-group hl7-demo-rg --query "[0].name" -o tsv) \
-     --query id -o tsv
+     --query "[0].id" -o tsv
    ```
 
 4. Click **Create** (status shows `Provisioning`)
 
-![Creating Managed Private Endpoint](docs/images/Add_MPE_to_Fabric.gif)
-
 **Approve in Azure Portal:**
-1. Go to your **Event Hubs namespace** → **Networking** → **Private access**
+1. Go to your **Event Hubs namespace** → **Networking** → **Private endpoint connections**
 2. Select the pending connection → **Approve**
+3. Wait for status to show **Approved** in both Azure and Fabric
 
-### Step 3: Create Eventhouse
+### Step 3: Create Eventstream
 
-1. In your workspace, click **+ New item** → **Eventhouse**
-2. Name it `hl7-eventhouse` → **Create**
+1. In your workspace, click **+ New item** → **Eventstream**
+2. Name it `hl7-eventstream` → **Create**
 
-### Step 4: Connect to Event Hubs
+### Step 4: Add Event Hub as Source
 
-1. In the Eventhouse, click **Get data** → **Event Hubs**
-2. Expand `hl7-eventhouse` → **+ New table** → name it `hl7_messages`
-3. Create new connection with:
+1. In the Eventstream editor, click **Add source** → **Azure Event Hubs**
+2. Select **New connection** and configure:
 
    | Field | Value |
    |-------|-------|
    | **Event Hub namespace** | Your namespace (e.g., `hl7ehnsh7kcjfwhqnvre`) |
    | **Event Hub** | `hl7-events` |
    | **Authentication** | Shared Access Key |
-   | **Key Name** | `FabricListen` |
-   | **Key** | *(see below)* |
+   | **Shared Access Key Name** | `FabricListen` |
+   | **Shared Access Key** | *(see below)* |
 
    ```bash
-   # Create the FabricListen policy (if needed)
+   # Get the shared access key
    EH_NAMESPACE=$(az eventhubs namespace list --resource-group hl7-demo-rg --query "[0].name" -o tsv)
-   az eventhubs eventhub authorization-rule create \
-     --resource-group hl7-demo-rg \
-     --namespace-name $EH_NAMESPACE \
-     --eventhub-name hl7-events \
-     --name FabricListen \
-     --rights Listen
-
-   # Get the key
    az eventhubs eventhub authorization-rule keys list \
      --resource-group hl7-demo-rg \
      --namespace-name $EH_NAMESPACE \
@@ -138,10 +131,26 @@ Event Hubs requires a private endpoint for Fabric connectivity.
      --query primaryKey -o tsv
    ```
 
-4. Select **Consumer group**: `$Default`
-5. Click **Next** → proceed through schema inspection → **Finish**
+3. **Uncheck** "Test connection" (required for private endpoints)
+4. Enter **Consumer group**: `$Default`
+5. Click **Connect**
 
-### Step 5: Verify Data Flow
+Once connected, a secure connection icon appears indicating MPE is active.
+
+### Step 5: Create Eventhouse
+
+1. In your workspace, click **+ New item** → **Eventhouse**
+2. Name it `hl7-eventhouse` → **Create**
+
+### Step 6: Route Eventstream to Eventhouse
+
+1. Return to `hl7-eventstream`
+2. Click **Add destination** → **Eventhouse**
+3. Select your `hl7-eventhouse` and create table `hl7_messages`
+4. Configure data mapping as needed
+5. Click **Save**
+
+### Step 7: Verify Data Flow
 
 ```bash
 # Send test messages
@@ -181,6 +190,7 @@ Fabric resources must be deleted manually:
 | [Reference Guide](docs/REFERENCE.md) | Detailed architecture, parameters, and configuration |
 | [Troubleshooting](TROUBLESHOOTING.md) | Common issues and solutions |
 | [PRD](prd-hl7-eh-fab.md) | Product requirements document |
+| 
 
 ## Key Commands
 

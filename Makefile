@@ -67,3 +67,6 @@ restart: ## Restart HL7 listener pods
 
 scale: ## Scale HL7 listener (usage: make scale REPLICAS=3)
 	kubectl scale deployment/hl7-listener -n hl7 --replicas=$(REPLICAS)
+
+check-fabric: ## Check Fabric MPE status and Event Hub metrics
+	@./scripts/check-fabric-mpe.sh $(RESOURCE_GROUP)
