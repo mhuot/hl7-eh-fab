@@ -61,6 +61,101 @@ make test IP=<EXTERNAL-IP>
 
 Replace `<EXTERNAL-IP>` with the external IP shown at the end of `make deploy`.
 
+---
+
+## Microsoft Fabric Setup
+
+After deploying infrastructure, configure Fabric to ingest HL7 messages.
+
+### Step 1: Create Fabric Workspace
+
+1. Go to [Microsoft Fabric](https://app.fabric.microsoft.com)
+2. **Workspaces** → **New workspace** → Name it `hl7-analytics`
+3. Under **Advanced**, select your Fabric capacity (`hl7fabriccap`)
+4. Click **Apply**
+
+### Step 2: Create Managed Private Endpoint
+
+Event Hubs requires a private endpoint for Fabric connectivity.
+
+1. Open your workspace → **Workspace settings** (gear icon)
+2. Select **Outbound networking** → **+ Create**
+3. Configure:
+   - **Name**: `hl7-eventhub-mpe`
+   - **Resource identifier**: *(get with command below)*
+   - **Target sub-resource**: `namespace`
+
+   ```bash
+   az eventhubs namespace show \
+     --resource-group hl7-demo-rg \
+     --name $(az eventhubs namespace list --resource-group hl7-demo-rg --query "[0].name" -o tsv) \
+     --query id -o tsv
+   ```
+
+4. Click **Create** (status shows `Provisioning`)
+
+![Creating Managed Private Endpoint](docs/images/Add_MPE_to_Fabric.gif)
+
+**Approve in Azure Portal:**
+1. Go to your **Event Hubs namespace** → **Networking** → **Private access**
+2. Select the pending connection → **Approve**
+
+### Step 3: Create Eventhouse
+
+1. In your workspace, click **+ New item** → **Eventhouse**
+2. Name it `hl7-eventhouse` → **Create**
+
+### Step 4: Connect to Event Hubs
+
+1. In the Eventhouse, click **Get data** → **Event Hubs**
+2. Expand `hl7-eventhouse` → **+ New table** → name it `hl7_messages`
+3. Create new connection with:
+
+   | Field | Value |
+   |-------|-------|
+   | **Event Hub namespace** | Your namespace (e.g., `hl7ehnsh7kcjfwhqnvre`) |
+   | **Event Hub** | `hl7-events` |
+   | **Authentication** | Shared Access Key |
+   | **Key Name** | `FabricListen` |
+   | **Key** | *(see below)* |
+
+   ```bash
+   # Create the FabricListen policy (if needed)
+   EH_NAMESPACE=$(az eventhubs namespace list --resource-group hl7-demo-rg --query "[0].name" -o tsv)
+   az eventhubs eventhub authorization-rule create \
+     --resource-group hl7-demo-rg \
+     --namespace-name $EH_NAMESPACE \
+     --eventhub-name hl7-events \
+     --name FabricListen \
+     --rights Listen
+
+   # Get the key
+   az eventhubs eventhub authorization-rule keys list \
+     --resource-group hl7-demo-rg \
+     --namespace-name $EH_NAMESPACE \
+     --eventhub-name hl7-events \
+     --name FabricListen \
+     --query primaryKey -o tsv
+   ```
+
+4. Select **Consumer group**: `$Default`
+5. Click **Next** → proceed through schema inspection → **Finish**
+
+### Step 5: Verify Data Flow
+
+```bash
+# Send test messages
+make test IP=<EXTERNAL-IP>
+```
+
+Query in KQL Database:
+```kusto
+hl7_messages
+| take 10
+```
+
+---
+
 ## Teardown
 
 ### Azure Resources
