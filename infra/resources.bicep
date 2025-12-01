@@ -205,13 +205,24 @@ resource privateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneG
   }
 }
 
-// Authorization rule for Kafka access
+// Authorization rule for Kafka access (namespace-level for AKS producer)
 resource eventHubAuthRule 'Microsoft.EventHub/namespaces/authorizationRules@2023-01-01-preview' = {
   parent: eventHubNamespace
   name: 'KafkaSendListen'
   properties: {
     rights: [
       'Send'
+      'Listen'
+    ]
+  }
+}
+
+// Authorization rule for Fabric (Event Hub-level, Listen only)
+resource fabricAuthRule 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2023-01-01-preview' = {
+  parent: eventHub
+  name: 'FabricListen'
+  properties: {
+    rights: [
       'Listen'
     ]
   }
