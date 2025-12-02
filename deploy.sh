@@ -6,17 +6,23 @@ set -e
 
 RESOURCE_GROUP=${1:-"hl7-demo-rg"}
 IMAGE_TAG=${2:-"v1"}
+LOCATION=${3:-"centralus"}
+DEPLOYMENT_NAME="hl7Deployment-${LOCATION}"
 
 echo "=== HL7 Listener Deployment ==="
 echo "Resource Group: $RESOURCE_GROUP"
+echo "Location: $LOCATION"
+echo "Deployment: $DEPLOYMENT_NAME"
 
 # Get deployment outputs
 echo "Getting deployment outputs..."
-ACR_NAME=$(az deployment sub show --name hl7Deployment --query "properties.outputs.acrName.value" -o tsv 2>/dev/null || \
+ACR_NAME=$(az deployment sub show --name $DEPLOYMENT_NAME --query "properties.outputs.acrName.value" -o tsv 2>/dev/null || \
            az acr list --resource-group $RESOURCE_GROUP --query "[0].name" -o tsv)
 ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
-AKS_NAME=$(az aks list --resource-group $RESOURCE_GROUP --query "[0].name" -o tsv)
-EH_NAMESPACE=$(az eventhubs namespace list --resource-group $RESOURCE_GROUP --query "[0].name" -o tsv)
+AKS_NAME=$(az deployment sub show --name $DEPLOYMENT_NAME --query "properties.outputs.aksClusterName.value" -o tsv 2>/dev/null || \
+           az aks list --resource-group $RESOURCE_GROUP --query "[0].name" -o tsv)
+EH_NAMESPACE=$(az deployment sub show --name $DEPLOYMENT_NAME --query "properties.outputs.eventHubNamespace.value" -o tsv 2>/dev/null || \
+           az eventhubs namespace list --resource-group $RESOURCE_GROUP --query "[0].name" -o tsv)
 
 echo "ACR: $ACR_NAME ($ACR_LOGIN_SERVER)"
 echo "AKS: $AKS_NAME"

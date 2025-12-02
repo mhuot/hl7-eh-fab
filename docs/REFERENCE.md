@@ -75,9 +75,11 @@ flowchart LR
 | 2 | **HL7 Listener Pods** | Receive messages, parse HL7 v2.x, produce to Kafka |
 | 3 | **Private Endpoint** | Routes traffic securely to Event Hubs (no public internet) |
 | 4 | **Event Hubs** | Receives messages via Kafka protocol |
-| 5 | **Fabric MPE** | Connects to Event Hubs via private link |
-| 6 | **Eventhouse (KQL)** | Ingests from Event Hubs and stores data for analytics |
+| 5 | **Eventstream + Fabric MPE** | Eventstream connects to Event Hubs via managed private endpoint and normalizes events |
+| 6 | **Eventhouse (KQL)** | Eventstream routes curated data into Eventhouse for analytics |
 | 7 | **Power BI** | Visualizes HL7 message trends and patient data |
+
+> **Why Eventstream?** Eventstream provides a Fabric-managed virtual network, simplifying managed private endpoint creation, and offers schema normalization before persisting data into Eventhouse. Learn more in the [Fabric Eventstream managed private endpoint documentation](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/set-up-private-endpoint).
 
 ---
 
@@ -222,6 +224,21 @@ kubectl get service hl7-listener -n hl7
 
 After deploying the infrastructure and HL7 listener, configure Microsoft Fabric to ingest and analyze HL7 messages.
 
+### Recommended workflow (Eventstream + Eventhouse)
+
+1. **Create a Fabric workspace** (for example `hl7-analytics`) that targets the deployed Fabric capacity. Fabric workspace basics: [Create workspaces in Fabric](https://learn.microsoft.com/en-us/fabric/get-started/workspaces-manage).
+2. **Create a managed private endpoint** under workspace **Network security** pointing at the Event Hubs namespace resource ID. Follow the [managed private endpoint overview](https://learn.microsoft.com/en-us/fabric/security/security-managed-private-endpoints-overview) for detailed instructions.
+3. **Approve the managed private endpoint** in the Azure portal (Event Hubs → Networking → Private endpoint connections). Azure reference: [Event Hubs networking guide](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-private-link).
+4. **Create an Eventstream item** (`hl7-eventstream`) and add Azure Event Hubs as a source using the `FabricListen` shared access key. See [Connect Azure Event Hubs to Eventstream](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/connect-azure-event-hubs).
+5. **Create an Eventhouse** (`hl7-eventhouse`) and route the Eventstream output into a table such as `hl7_messages`. Reference: [Create and use Eventhouse in Fabric](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/eventhouse/create-eventhouse).
+6. **Send test HL7 traffic** with `make test IP=<external-ip>` and query the Eventhouse (`hl7_messages | take 10`).
+7. **Validate private connectivity** at any time with `make check-fabric RESOURCE_GROUP=<rg>` to ensure the managed private endpoint remains approved and Event Hubs is receiving messages.
+
+See the README for a step-by-step screenshot walkthrough of these tasks.
+
+<details>
+<summary>Legacy direct Eventhouse connector (deprecated but retained for reference)</summary>
+
 ### Step 1: Create Fabric Workspace
 
 1. Navigate to [Microsoft Fabric](https://app.fabric.microsoft.com)
@@ -356,6 +373,8 @@ Event Hubs is configured with private endpoints only. Fabric supports Managed Pr
    | take 10
    ```
 
+</details>
+
 ---
 
 ## Sample KQL Queries
@@ -386,6 +405,18 @@ hl7_messages
 | project timestamp, message_type, sending_application
 | order by timestamp desc
 ```
+
+---
+
+## Fabric Connectivity Checks
+
+Use the helper script (`make check-fabric RESOURCE_GROUP=<rg>`) whenever you need to confirm the managed private endpoint status or Event Hub activity. The script reports:
+
+- Private endpoint approvals for both AKS and Fabric Eventstream connections
+- Pending requests that require action in the Azure portal
+- Incoming/outgoing message counts and active connection metrics for the Event Hub namespace
+
+This is particularly useful after rotating credentials, changing regions, or recreating Fabric workspaces.
 
 ---
 

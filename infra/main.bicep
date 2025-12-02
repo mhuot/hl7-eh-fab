@@ -8,6 +8,8 @@ param eventHubNamespaceName string = 'hl7ehns${uniqueString(rgName)}'
 param eventHubName string = 'hl7-events'
 param capacityName string = 'hl7fabriccap'
 param adminUsername string = 'azureuser'
+@description('VM size for AKS system node pool')
+param aksNodeVmSize string = 'Standard_B2ps_v2'
 param deployFabricCapacity bool = true  // Set to true if you have Fabric quota
 @description('Resource ID of an existing Log Analytics workspace. Leave empty to create a new one.')
 param existingLogAnalyticsWorkspaceId string = ''
@@ -35,6 +37,7 @@ module resources 'resources.bicep' = {
     adminUsername: adminUsername
     sshPublicKey: sshPublicKey
     existingLogAnalyticsWorkspaceId: existingLogAnalyticsWorkspaceId
+    aksNodeVmSize: aksNodeVmSize
   }
 }
 

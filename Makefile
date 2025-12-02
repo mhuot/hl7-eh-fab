@@ -31,10 +31,12 @@ infra: ## Deploy Azure infrastructure (Bicep)
 		--template-file infra/main.bicep \
 		--location $(LOCATION) \
 		--parameters infra/main.parameters.local.json \
-		--name hl7Deployment
+		--parameters rgName=$(RESOURCE_GROUP) \
+		--parameters location=$(LOCATION) \
+		--name hl7Deployment-$(LOCATION)
 
 deploy: ## Deploy HL7 listener to AKS
-	./deploy.sh $(RESOURCE_GROUP) $(IMAGE_TAG)
+	./deploy.sh $(RESOURCE_GROUP) $(IMAGE_TAG) $(LOCATION)
 
 test: ## Send test HL7 messages (usage: make test IP=<external-ip> [COUNT=100])
 ifndef IP

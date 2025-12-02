@@ -48,6 +48,18 @@ make validate
 make infra
 ```
 
+To deploy into a different resource group or region, override the variables inline, for example:
+
+```bash
+make infra RESOURCE_GROUP=my-rg LOCATION=westus2
+```
+
+If the default AKS VM size (`Standard_B2ps_v2`) is unavailable in your target region/subscription, override it during deployment:
+
+```bash
+make infra RESOURCE_GROUP=eastus2-rg LOCATION=eastus2 AKS_NODE_VM_SIZE=Standard_D2s_v3
+```
+
 ### 5. Deploy HL7 listener
 
 ```bash
@@ -68,7 +80,7 @@ Replace `<EXTERNAL-IP>` with the external IP shown at the end of `make deploy`.
 
 After deploying infrastructure, configure Fabric to ingest HL7 messages using **Eventstream** with a managed private endpoint.
 
-> **Note**: Eventstream with MPE is the recommended approach for connecting to Event Hubs with private networking. Direct Eventhouse-to-Event Hub connections with MPE have known limitations.
+> **Note**: Eventstream with MPE is the recommended approach for connecting to Event Hubs with private networking. Direct Eventhouse-to-Event Hub connections with MPE have known limitations. See [Connect to Azure resources securely using managed private endpoints](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/set-up-private-endpoint) for Microsoft’s official guidance.
 
 ### Step 1: Create Fabric Workspace
 
@@ -79,7 +91,7 @@ After deploying infrastructure, configure Fabric to ingest HL7 messages using **
 
 ### Step 2: Create Managed Private Endpoint
 
-Create a private endpoint for secure Event Hub connectivity.
+Create a private endpoint for secure Event Hub connectivity (see the [Fabric managed private endpoint article](https://learn.microsoft.com/en-us/fabric/security/security-managed-private-endpoints-overview) for prerequisites).
 
 1. Open your workspace → **Workspace settings** (gear icon)
 2. Select **Network security** → **+ Create**
@@ -135,7 +147,7 @@ Create a private endpoint for secure Event Hub connectivity.
 4. Enter **Consumer group**: `$Default`
 5. Click **Connect**
 
-Once connected, a secure connection icon appears indicating MPE is active.
+Once connected, a secure connection icon appears indicating MPE is active. Refer to the [Eventstream connectivity guide](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/connect-azure-event-hubs) for troubleshooting tips.
 
 ### Step 5: Create Eventhouse
 
@@ -163,6 +175,47 @@ hl7_messages
 | take 10
 ```
 
+### Step 8: Check Fabric connectivity (optional)
+
+Run the helper script to confirm the managed private endpoint and Event Hub metrics:
+
+```bash
+make check-fabric RESOURCE_GROUP=<your-resource-group>
+```
+
+The command surfaces pending approvals, active connections, and message counts.
+
+### Step 9: Verify DNS resolution from Fabric Spark (optional)
+
+Managed private endpoints rely on Fabric’s managed VNet DNS to resolve the Event Hubs namespace to a private IP. You can confirm this from a Spark notebook in the same workspace:
+
+1. In your Fabric workspace, create a **Notebook** (Spark). Attach it to the same workspace/capacity.
+2. Paste the following cell and run it (replace `<your-namespace>` with the Event Hubs namespace host, e.g., `hl7ehnsh7kcjfwhqnvre.servicebus.windows.net`).
+
+```python
+%%pyspark
+import re
+import subprocess
+
+hostname = "<your-namespace>"
+print(f"Resolving {hostname} from Fabric Spark...")
+result = subprocess.run(["nslookup", hostname], capture_output=True, text=True)
+print(result.stdout)
+
+rfc1918_pattern = re.compile(
+  r"(10\.\d{1,3}\.\d{1,3}\.\d{1,3})|"
+  r"(172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})|"
+  r"(192\.168\.\d{1,3}\.\d{1,3})"
+)
+
+if rfc1918_pattern.search(result.stdout):
+  print("✅ Managed private endpoint resolves to an RFC1918 private IP")
+else:
+  print("⚠️ Resolution did not return an RFC1918 address. Check MPE status and private DNS.")
+```
+
+3. The output should list an IP in the private ranges (10.x.x.x, 172.16-31.x.x, or 192.168.x.x). If you see a public address, the MPE or private DNS link isn’t active yet.
+
 ---
 
 ## Teardown
@@ -170,7 +223,7 @@ hl7_messages
 ### Azure Resources
 
 ```bash
-az group delete --name hl7-demo-rg --yes --no-wait
+az group delete --name <your-resource-group> --yes --no-wait
 ```
 
 ### Microsoft Fabric Resources
@@ -190,7 +243,6 @@ Fabric resources must be deleted manually:
 | [Reference Guide](docs/REFERENCE.md) | Detailed architecture, parameters, and configuration |
 | [Troubleshooting](TROUBLESHOOTING.md) | Common issues and solutions |
 | [PRD](prd-hl7-eh-fab.md) | Product requirements document |
-| 
 
 ## Key Commands
 
@@ -202,6 +254,10 @@ Fabric resources must be deleted manually:
 | `make test IP=<ip>` | Send test HL7 messages |
 | `make logs` | View HL7 listener logs |
 | `make status` | Check pod and service status |
+| `make check-fabric` | Inspect Fabric managed private endpoint & metrics |
+| `make scale REPLICAS=n` | Scale the HL7 listener deployment |
+| `make restart` | Restart HL7 listener pods |
+| `make clean` | Delete the provisioned resource group |
 
 ## Project Structure
 

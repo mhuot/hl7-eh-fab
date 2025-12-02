@@ -8,6 +8,8 @@ param eventHubName string
 param adminUsername string
 @description('Resource ID of an existing Log Analytics workspace. Leave empty to create a new one.')
 param existingLogAnalyticsWorkspaceId string = ''
+@description('VM size for the AKS system node pool')
+param aksNodeVmSize string = 'Standard_B2ps_v2'
 @secure()
 param sshPublicKey string
 
@@ -83,7 +85,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-02-01' = {
       {
         name: 'nodepool1'
         count: 1
-        vmSize: 'Standard_B2ps_v2'
+        vmSize: aksNodeVmSize
         osType: 'Linux'
         mode: 'System'
         vnetSubnetID: vnet.properties.subnets[0].id
